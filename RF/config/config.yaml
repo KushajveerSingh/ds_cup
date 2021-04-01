@@ -1,0 +1,9 @@
+data:
+  path: '../data_orig'
+  add_missing_col_rep_income: true
+  add_missing_col_uti_card_50plus_pct: true
+  add_isOld_col: true
+  isOld_value: 297
+  processed_data_exists: false
+  save_path: '../processed_data'
+
