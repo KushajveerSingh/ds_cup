@@ -5,21 +5,7 @@ import os
 from pathlib import Path
 
 
-def handle_columns(cfg, df, median_dict=None):
-    # Get median values
-    if median_dict is None:
-        return_median_dict = True
-        median_rep_income = df['rep_income'].median()
-        median_uti_card_50plus_pct = df['uti_card_50plus_pct'].median()
-
-        median_dict = {}
-        median_dict['rep_income'] = median_rep_income
-        median_dict['uti_card_50plus_pct'] = median_uti_card_50plus_pct
-    else:
-        return_median_dict = False
-        median_rep_income = median_dict['rep_income']
-        median_uti_card_50plus_pct = median_dict['uti_card_50plus_pct']
-
+def handle_columns(cfg, df, median_dict, label_encoder, is_train=False):
     # Add column for missing values
     if cfg.data.add_missing_col_rep_income:
         df['isNaN_rep_income'] = (df['rep_income'].isnull()).astype(int)
@@ -27,15 +13,24 @@ def handle_columns(cfg, df, median_dict=None):
         df['isNaN_uti_card_50plus_pct'] = (df['uti_card_50plus_pct'].isnull()).astype(int)
 
     # Replace missing values with median
-    df['rep_income'] = df['rep_income'].fillna(median_rep_income)
-    df['uti_card_50plus_pct'] = df['uti_card_50plus_pct'].fillna(median_uti_card_50plus_pct)
+    df['rep_income'] = df['rep_income'].fillna(median_dict['rep_income'])
+    df['uti_card_50plus_pct'] = df['uti_card_50plus_pct'].fillna(median_dict['uti_card_50plus_pct'])
 
     # Add 'isOld' col
     if cfg.data.add_isOld_col:
         df['isOld'] = (df['credit_age'] > cfg.data.isOld_value).astype(int)
 
+    # Remove white space from "auto_open_ 36_month_num"
+    df = df.rename(columns={"auto_open_ 36_month_num": "auto_open_36_month_num"})
+
+    # One-hot encode State column
+    df = pd.get_dummies(df, prefix='State', columns=['States'])
+
+    # Label 'Default_ind' using LabelEncoder
+    df.loc[:, 'Default_ind'] = label_encoder.transform(df['Default_ind'].values)
+
     # Balance the training data
-    if return_median_dict:
+    if is_train:
         default_ind_1 = df[df['Default_ind'] == 1]
 
         default_ind_0 = df[df['Default_ind'] == 0].sample(frac=1).reset_index(drop=True)
@@ -44,10 +39,7 @@ def handle_columns(cfg, df, median_dict=None):
         df = pd.concat([default_ind_0, default_ind_1])
         df = df.sample(frac=1).reset_index(drop=True)
 
-    if return_median_dict:
-        return df, median_dict
-    else:
-        return df
+    return df
 
 
 @hydra.main(config_path='config', config_name='config')
@@ -71,24 +63,16 @@ def get_data(cfg):
         valid_df = pd.read_csv(path/'valid.csv')
         test_df = pd.read_csv(path/'test.csv')
 
-        # Handle missing columns
-        # Replace 'rep_income' with median and (optionally) add missing column
-        # Replace 'uti_card_50plus_pct` with median and (optionally) add missing column
-        train_df, median_dict = handle_columns(cfg, train_df)
-        valid_df = handle_columns(cfg, valid_df, median_dict)
-        test_df = handle_columns(cfg, test_df, median_dict)
-
-        # Label 'DefaultInd' using LabelEncoder
         label_encoder = preprocessing.LabelEncoder()
         label_encoder.fit(train_df['Default_ind'].values)
-        train_df.loc[:, 'Default_ind'] = label_encoder.transform(train_df['Default_ind'].values)
-        valid_df.loc[:, 'Default_ind'] = label_encoder.transform(valid_df['Default_ind'].values)
-        test_df.loc[:, 'Default_ind'] = label_encoder.transform(test_df['Default_ind'].values)
 
-        # One-hot encode 'State' column
-        train_df = pd.get_dummies(train_df, prefix='State', columns=['States'])
-        valid_df = pd.get_dummies(valid_df, prefix='State', columns=['States'])
-        test_df = pd.get_dummies(test_df, prefix='State', columns=['States'])
+        median_dict = {}
+        median_dict['rep_income'] = train_df['rep_income'].median()
+        median_dict['uti_card_50plus_pct'] = train_df['uti_card_50plus_pct'].median()
+
+        train_df = handle_columns(cfg, train_df, median_dict, label_encoder, is_train=True)
+        valid_df = handle_columns(cfg, valid_df, median_dict, label_encoder)
+        test_df  = handle_columns(cfg, test_df,  median_dict, label_encoder)
 
         # Save the data
         save_dir = Path(f'{orig_cwd}/{cfg.data.save_path}')
