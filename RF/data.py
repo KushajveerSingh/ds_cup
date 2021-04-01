@@ -38,11 +38,11 @@ def handle_columns(cfg, df, median_dict=None):
     if return_median_dict:
         default_ind_1 = df[df['Default_ind'] == 1]
 
-        default_ind_0 = df[df['Default_ind'] == 0].sample(frac=1)
+        default_ind_0 = df[df['Default_ind'] == 0].sample(frac=1).reset_index(drop=True)
         default_ind_0 = default_ind_0.iloc[:len(default_ind_1)]
 
         df = pd.concat([default_ind_0, default_ind_1])
-        df = df.sample(frac=1)
+        df = df.sample(frac=1).reset_index(drop=True)
 
     if return_median_dict:
         return df, median_dict
