@@ -6,4 +6,3 @@ data:
   isOld_value: 297
   processed_data_exists: true
   save_path: '../processed_data'
-

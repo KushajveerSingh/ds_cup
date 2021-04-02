@@ -9,18 +9,22 @@ import hydra
 
 @hydra.main(config_path="config", config_name="config")
 def random_forest(cfg):
+    # Load data
     train_df, valid_df, test_df = get_data(cfg)
     df = pd.concat([train_df, valid_df])
+    
+    # Remove columns and split data into (X,y)
     df = df.drop(['State_AL', 'State_NC', 'isNaN_rep_income', 'State_FL', 'State_LA',
        'isNaN_uti_card_50plus_pct', 'State_SC', 'State_GA', 'State_MS',
        'auto_open_36_month_num', 'card_open_36_month_num', 'ind_acc_XYZ'], axis=1)
-    
     X = df.drop("Default_ind", axis=1).values
     y = df["Default_ind"].values
     
+    # Below 2 lines needed for cross-validation in RandomizedSearchCV
     split_index = [-1]*len(train_df) + [0]*len(valid_df)
     pds = PredefinedSplit(test_fold=split_index)
 
+    # Create classifier and the hyperparameter search space
     classifier = RandomForestClassifier(n_jobs=-1, verbose=1)
     param_grid = {
         "n_estimators": np.arange(50, 1000, 100),
@@ -31,6 +35,7 @@ def random_forest(cfg):
         "min_samples_leaf": np.arange(1, 5),
         "bootstrap": [True, False],
     }
+
     model = RandomizedSearchCV(
         estimator=classifier,
         param_distributions=param_grid,
