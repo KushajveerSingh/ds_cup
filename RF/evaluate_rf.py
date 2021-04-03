@@ -16,4 +16,5 @@ if __name__ == "__main__":
 
     y_pred = clf.predict(X)
 
-    print(metrics.f1_score(y, y_pred))
+    print(f"f1 = {metrics.f1_score(y, y_pred)}")
+    print(f"roc auc = {metrics.roc_auc_score(y, y_pred)}")

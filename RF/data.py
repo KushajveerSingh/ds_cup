@@ -29,7 +29,7 @@ def handle_columns(cfg, df, median_dict, label_encoder, is_train=False):
     # Label 'Default_ind' using LabelEncoder
     df.loc[:, 'Default_ind'] = label_encoder.transform(df['Default_ind'].values)
 
-    # Balance the training data
+    # # Balance the training data
     if is_train:
         default_ind_1 = df[df['Default_ind'] == 1]
 
