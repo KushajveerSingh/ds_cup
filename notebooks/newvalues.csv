@@ -11,3 +11,5 @@ avg_card_debt,card_age,non_mtg_acc_past_due_12_months_num,inq_12_month_num,uti_c
 1000.0,1.0,1.0,11.0,1.0,True,False
 11000.0,0.0,0.0,0.0,0.5,False,False
 11000.0,0.0,0.0,0.0,0.5,False,True
+11000.0,10.0,0.0,0.0,0.5,False,False
+110.0,10.0,0.0,0.0,0.5,True,True
