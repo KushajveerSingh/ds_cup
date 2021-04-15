@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 notebooks/ds_cup/
 data_orig/Thresholds.csv
+notebooks/_out.jpg
