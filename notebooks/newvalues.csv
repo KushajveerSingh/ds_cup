@@ -1,3 +1,10 @@
-,,,,,Model,User
+avg_card_debt,card_age,non_mtg_acc_past_due_12_months_num,inq_12_month_num,uti_card,Model,User
 9,9,99,9,9,TRUE,TRUE
 2000,38,0,0,1,TRUE,TRUE
+9000,1,1,1,1,TRUE,TRUE
+16692.19,211,0,4,0.428,FALSE,FALSE
+11426.11,356,0,0,0.5564,FALSE,FALSE
+11426.11,356,0,0,0.8,FALSE,FALSE
+11426.11,356,4,0,0.8,TRUE,TRUE
+9000.0,12.0,0.0,0.0,0.3,False,False
+9000.0,12.0,0.0,0.0,0.3,False,True
